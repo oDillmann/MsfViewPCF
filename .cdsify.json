@@ -1,0 +1,12 @@
+{
+  "entities": [
+    "axa_dealsetupform",
+    "quote",
+    "systemuser"
+  ],
+  "actions": [],
+  "functions": [],
+  "output": {
+    "outputRoot": "./SalesViewPCF/cds-generated"
+  }
+}
