@@ -1,56 +1,80 @@
-import { Stack, Text } from '@fluentui/react';
-import React from 'react';
-import { axa_cwsstatus } from '../cds-generated/enums/axa_cwsstatus';
-import { axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus } from '../cds-generated/enums/axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus';
-import { axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform } from '../cds-generated/enums/axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform';
-import { SalesFulfillmentStatus } from '../types/SalesFulfillmentStatus';
+import React, { useState } from 'react';
+import { Icon, Link, makeStyles, Stack, Text, TextField } from '@fluentui/react';
+import { axa_dealsetupformMetadata } from '../cds-generated/entities/axa_DealSetupForm';
+import { MachineSetupForm } from '../types/MachineSetupForm';
+import { useVM } from '../viewModel/context';
 
-interface props { Departments: string[], sf: SalesFulfillmentStatus }
+interface props { msf: MachineSetupForm }
 
-const BodyRows = ({ Departments, sf }: props) => {
+const useStyles = makeStyles((theme) => ({
+  acceptButton: {
+    width: '100%', padding: 0, borderRadius: "5px", borderTopRightRadius: "0px", borderBottomRightRadius: "0px",
+    transition: "80ms ease-in-out all", backgroundColor: theme.palette.themePrimary, color: theme.palette.white,
+    border: "none", height: "100%", cursor: "pointer",
+    "&:hover": { backgroundColor: theme.palette.themeDarkAlt },
+    "&:active": { backgroundColor: theme.palette.themeDark }
+  },
+  acceptButtonDisabled: {
+    width: '100%', padding: 0, borderRadius: "5px", borderTopRightRadius: "0px", borderBottomRightRadius: "0px", cursor: "not-allowed",
+    backgroundColor: theme.palette.neutralLight, color: theme.palette.neutralTertiaryAlt, border: "none", height: "100%",
+  }
+}))
+
+const BodyRows = ({ msf }: props) => {
+  const vm = useVM();
+  const styles = useStyles();
+  const [_isLoading, setIsLoading] = useState(false);
+  const [completedDate, setCompletedDate] = useState<Date | null>(null);
+
+  const saveCompletedDate = async () => {
+    if (completedDate) {
+      // check if the text field is empty
+      setIsLoading(true);
+      try {
+        await vm.completeMsf(msf.guid, completedDate)
+      } catch (e) {
+        setIsLoading(false)
+      }
+    }
+  }
+
   return (
     <>
-      {Departments.map((d) => {
-        const status = sf.department[d] || axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus.Notstarted;
-        const statusColor = status === axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus.Notstarted ? "#cc0000" :
-          status === axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus.WIP ? "orange" : "#00c000"
-        const statusText = status === axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus.Notstarted ? 'Not started' :
-          status === axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus.WIP ? "WIP" : "Done"
-        return (<td key={d} style={{ height: 0, whiteSpace: 'nowrap' }} >
-          <Stack verticalAlign="center" horizontalAlign="center" styles={{
-            root: { padding: '0.6rem 1rem', border: '2px solid #fff', borderRadius: '3px', backgroundColor: statusColor, height: '100%' }
-          }}>
-            <Text styles={{ root: { color: "white" } }}>{statusText}</Text>
+      {Array.from({ length: 10 }).map((_, i) => (
+        <td style={{ height: 0, whiteSpace: 'nowrap' }} key={i}>
+          <Stack verticalAlign="center" horizontalAlign="start" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #eee', height: '100%' } }} >
+            {i === 6 ?
+              <Link variant="mediumPlus" styles={{ root: { fontWeight: "600" } }} onClick={() => { vm.context.navigation.openForm({ entityName: axa_dealsetupformMetadata.logicalName, entityId: msf.guid, openInNewWindow: true }) }}>{msf.id}</Link>
+              : (i === 9 && !vm.isReadOnly) ? (
+                <Stack horizontal >
+                  <Stack.Item styles={{ root: { width: "32px", height: "32px" } }}>
+                    <button
+                      onClick={saveCompletedDate}
+                      className={completedDate ? styles.acceptButton : styles.acceptButtonDisabled}
+                    >
+                      <Icon iconName="Accept" styles={{ root: { height: "1rem", aspectRatio: "1", fontWeight: "900" } }} />
+                    </button>
+                  </Stack.Item>
+                  <TextField type="date" styles={{ fieldGroup: { border: "1px solid #ddd" } }} onChange={(_e, value) => { value && setCompletedDate(new Date(value)) }} />
+                </Stack>
+              ) : (
+                <Text variant="mediumPlus" nowrap block styles={{ root: { ...(i === 8 ? { fontWeight: '600', ...(msf.MsfStatus === "Approved" ? { color: "#2c2" } : msf.MsfStatus === "Submitted" ? { color: "red" } : {}) } : {}) } }}>
+                  {i === 0 ? msf.customerName :
+                    i === 1 ? msf.estimatedDelivery?.toDateString() :
+                      i === 2 ? msf?.model :
+                        i === 3 ? msf?.typeOfSale :
+                          i === 4 ? msf?.salesResponsible :
+                            i === 5 ? msf?.serialNumber :
+                              i === 7 ? msf?.inStock :
+                                i === 8 ? msf?.MsfStatus :
+                                  i === 9 && vm.isReadOnly ? msf?.completedDate : ""
+                  }
+                </Text>
+              )}
           </Stack>
         </td>
-        )
-      })}
-      <td />
-      <td style={{ height: 0, whiteSpace: 'nowrap' }} >
-        <Stack verticalAlign="center" horizontalAlign="center" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #fff', borderRadius: '3px', height: '100%' } }} >
-          <div style={{ borderRadius: '50%', backgroundColor: sf.requirements.SA ? "#00c000" : "#cc0000", height: '25px', width: '25px', }} />
-        </Stack>
-      </td>
-      <td style={{ height: 0, whiteSpace: 'nowrap' }} >
-        <Stack verticalAlign="center" horizontalAlign="center" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #fff', borderRadius: '3px', height: '100%' } }} >
-          <div style={{ borderRadius: '50%', backgroundColor: sf.requirements.MDC ? "#00c000" : "#cc0000", height: '25px', width: '25px', }} />
-        </Stack>
-      </td>
-      <td style={{ height: 0, whiteSpace: 'nowrap' }} >
-        <Stack verticalAlign="center" horizontalAlign="center" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #fff', borderRadius: '3px', height: '100%' } }} >
-          <div style={{ borderRadius: '50%', backgroundColor: sf.requirements.DA === axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform.Yes ? "#00c000" : sf.requirements.DA === axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform.No ? "#cc0000" : "orange", height: '25px', width: '25px', }} />
-        </Stack>
-      </td>
-      <td style={{ height: 0, whiteSpace: 'nowrap' }} >
-        <Stack verticalAlign="center" horizontalAlign="center" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #fff', borderRadius: '3px', height: '100%' } }} >
-          <div style={{ borderRadius: '50%', backgroundColor: sf.requirements.DSR ? "#00c000" : "#cc0000", height: '25px', width: '25px', }} />
-        </Stack>
-      </td>
-      <td style={{ height: 0, whiteSpace: 'nowrap' }} >
-        <Stack verticalAlign="center" horizontalAlign="center" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #fff', borderRadius: '3px', height: '100%' } }} >
-          <div style={{ borderRadius: '50%', backgroundColor: sf.requirements.CWS === axa_cwsstatus.Yes ? "#00c000" : sf.requirements.CWS === axa_cwsstatus.No ? "#cc0000" : "orange", height: '25px', width: '25px', }} />
-        </Stack>
-      </td>
+      ))
+      }
     </>
   )
 }

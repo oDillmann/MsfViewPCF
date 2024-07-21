@@ -1,32 +1,16 @@
+import { axa_dealsetupform_axa_dealsetupform_axa_dsfstatus } from "../cds-generated/enums/axa_dealsetupform_axa_dealsetupform_axa_dsfstatus"
 
 export type MachineSetupForm = {
   id: string,
-  title?: string, // customer name
+  guid: string,
+  customerName?: string, // customer name
   typeOfSale?: string
+  estimatedDelivery?: Date,
+  completedDate?: string,
+  model?: string,
+  serialNumber?: string,
   warehouse?: string,
+  MsfStatus?: string,
+  inStock?: boolean,
+  salesResponsible?: string,
 }
-
-// export type SalesFulfillmentStatus = {
-//   id: string,
-//   title?: string, // customer name
-//   phase?: string
-//   typeOfSale?: string
-//   warehouse?: string,
-//   model?: string,
-//   OpType?: z2t_type,
-//   DeliveryDate?: Date,
-//   isDateConfirmed: boolean,
-//   salesResponsible?: string,
-//   requirements: {
-//     //Machine Delivered to Customer
-//     MDC: boolean,
-//     //Sales Agreement
-//     SA: boolean,
-//     //Data Auth
-//     DA: axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform,
-//     //Delivery Service Record
-//     DSR: boolean,
-//     CWS: axa_cwsstatus,
-//   }
-//   department: { [department: string]: axa_departmentfulfillmentstatus_axa_departmentfulfillmentstatus_axa_fulfillmentstatus }
-// }

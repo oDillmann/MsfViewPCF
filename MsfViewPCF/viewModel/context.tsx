@@ -1,7 +1,8 @@
-import React from "react";
+import React from 'react'
+import { createContext } from "react";
 import MsfViewVM from "./MsfViewVM";
 
-export const SalesViewVMcontext = React.createContext<MsfViewVM>(
+export const SalesViewVMcontext = createContext<MsfViewVM>(
   {} as MsfViewVM
 );
 

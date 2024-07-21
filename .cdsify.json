@@ -7,6 +7,6 @@
   "actions": [],
   "functions": [],
   "output": {
-    "outputRoot": "./SalesViewPCF/cds-generated"
+    "outputRoot": "./MsfViewPCF/cds-generated"
   }
 }

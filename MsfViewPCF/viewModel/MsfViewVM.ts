@@ -2,34 +2,27 @@ import { makeAutoObservable } from "mobx";
 import CdsService from "../cdsService/CdsService";
 import { IInputs } from "../generated/ManifestTypes";
 import ServiceProvider from "../ServiceProvider";
-import { axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform } from "../cds-generated/enums/axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform";
 import { MachineSetupForm } from "../types/MachineSetupForm";
+import { axa_DealSetupFormAttributes, axa_dealsetupformMetadata } from "../cds-generated/entities/axa_DealSetupForm";
 
-export enum ViewType {
-  "Date",
-  "Sales Responsible",
-  "Warehouse",
-  "Type of Sale",
-}
+export enum ViewType { "Sales Responsible", "Warehouse", }
 
 export default class MsfViewVM {
-  public static readonly serviceName = "SalesViewVM";
+  public static readonly serviceName = "MsfViewVM";
   public serviceProvider: ServiceProvider;
   public context: ComponentFramework.Context<IInputs>;
   public notifyOutputChanged: () => void;
   public cdsService: CdsService;
   public errorMessage?: string = undefined;
-  private ControlRecords: Record<string, MachineSetupForm> = {};
-  private ViewRecords: MachineSetupForm[] = [];
   public Records: MachineSetupForm[] = [];
   public PCFerror?: string = undefined;
-  private isControlLoading: boolean = true;
+  public isReadOnly?: boolean = false;
   public isViewLoading: boolean = true;
   get isLoading() {
-    return this.isControlLoading || this.isViewLoading;
+    return this.isViewLoading;
   }
   public forceUpdate: () => void;
-  private viewType: ViewType = ViewType.Date;
+  private viewType: ViewType = ViewType.Warehouse;
   get ViewType() {
     return this.viewType;
   }
@@ -43,6 +36,7 @@ export default class MsfViewVM {
     this.context = serviceProvider.get("context");
     this.notifyOutputChanged = serviceProvider.get("notifyOutputChanged");
     this.cdsService = serviceProvider.get(CdsService.serviceName);
+    this.isReadOnly = this.context.parameters.ConfigurationOption.raw === "ReadOnly";
     makeAutoObservable(this);
   }
 
@@ -54,25 +48,6 @@ export default class MsfViewVM {
   public setError(errorMessage: string | undefined) {
     this.errorMessage = errorMessage;
     if (this.forceUpdate) this.forceUpdate();
-  }
-
-  public async init() {
-    this.isControlLoading = true;
-    await this.fetchData();
-    this.isControlLoading = false;
-    if (!this.isViewLoading) {
-      this.mergeSFS();
-    }
-  }
-
-  public async fetchData(): Promise<void> {
-    try {
-      // this.ControlRecords = {} as any; // cds response
-      throw new Error("Method not implemented.");
-    } catch (e: any) {
-      console.log(e);
-      this.setError(e.message);
-    }
   }
 
   // Helper function for grouping
@@ -103,19 +78,6 @@ export default class MsfViewVM {
     }, {} as Record<string, SFS[]>);
   }
 
-  // Date filter helper
-  private dateFilter<SFS>(
-    data: SFS[],
-    dateExtractor: (item: SFS) => Date | null,
-    dateCompare: (date: Date) => boolean
-  ) {
-    return data.filter(item => {
-      const date = dateExtractor(item);
-      const res = date && dateCompare(date);
-      return res;
-    });
-  }
-
   get groupedByWarehouse() {
     const grouped = this.groupBy(
       this.Records,
@@ -124,23 +86,6 @@ export default class MsfViewVM {
     );
     return this.sortByKeys(grouped, (a, b) =>
       a === "No Warehouse" ? 1 : b === "No Warehouse" ? -1 : a.localeCompare(b)
-    );
-  }
-
-  get groupedByType() {
-    // some copy paste magic for the .replace(/([a-z])([A-Z])/g, '$1 $2') part, wouldn't hurt anyone right? RIGHT?
-    // 'fast forward a few months' - me, 2024, i have no idea what this does, it ... replaces ??
-    const grouped = this.groupBy(
-      this.Records,
-      sfs => {
-        return sfs.OpType
-          ? z2t_type[sfs.OpType].replace(/([a-z])([A-Z])/g, "$1 $2")
-          : undefined;
-      },
-      "No Type"
-    );
-    return this.sortByKeys(grouped, (a, b) =>
-      a === "No Type" ? 1 : b === "No Type" ? -1 : a.localeCompare(b)
     );
   }
 
@@ -159,214 +104,57 @@ export default class MsfViewVM {
     );
   }
 
-  // Helper function to add date offset
-  private addDays(date: Date, days: number): Date {
-    const newDate = new Date(date);
-    newDate.setDate(date.getDate() + days);
-    return newDate;
-  }
-
-  /**
-   * @description gets the SFS that are past their due
-   */
-  get pastDue() {
-    return this.dateFilter(
-      this.Records,
-      sfs => (sfs.DeliveryDate ? new Date(sfs.DeliveryDate) : null),
-      date => date < new Date()
-    );
-  }
-
-  /**
-   * @description gets the SFS that have their esd in the current week
-   * @returns MachineSetupForm[]
-   */
-  get thisWeek() {
-    const today = new Date();
-    const weekEnd = this.addDays(today, 7);
-    return this.dateFilter(
-      this.Records,
-      sfs => (sfs.DeliveryDate ? new Date(sfs.DeliveryDate) : null),
-      date => date >= today && date <= weekEnd
-    );
-  }
-
-  /**
-   * @description gets the SFS that have their esd in the upcoming week
-   * @returns MachineSetupForm[]
-   */
-  get nextWeek() {
-    const nextWeekStart = this.addDays(new Date(), 7);
-    const nextWeekEnd = this.addDays(new Date(), 14);
-    return this.dateFilter(
-      this.Records,
-      sfs => (sfs.DeliveryDate ? new Date(sfs.DeliveryDate) : null),
-      date => date >= nextWeekStart && date <= nextWeekEnd
-    );
-  }
-
-  /**
-   * @description gets the SFS that have their esd beyond 2 weeks
-   * @returns MachineSetupForm[]
-   */
-  get beyond() {
-    const twoWeeks = this.addDays(new Date(), 14);
-    return this.dateFilter(
-      this.Records,
-      sfs => (sfs.DeliveryDate ? new Date(sfs.DeliveryDate) : null),
-      date => date > twoWeeks
-    );
-  }
-
-  /**
-   * @description gets the SFS that have their esd beyond upcoming week
-   * @returns MachineSetupForm[]
-   */
-  get upcoming() {
-    const twoWeeks = this.addDays(new Date(), 14);
-    return this.dateFilter(
-      this.Records,
-      sfs => (sfs.DeliveryDate ? new Date(sfs.DeliveryDate) : null),
-      date => date > twoWeeks
-    );
-  }
-
-  // Grouping by month
-  get pastDueByMonth() {
-    const grouped = this.groupBy(
-      this.pastDue,
-      sfs =>
-        `${sfs.DeliveryDate?.toLocaleString("default", {
-          month: "long",
-        })}, ${sfs.DeliveryDate?.getFullYear()}`,
-      "No Date"
-    );
-    return grouped;
-  }
-
-  get groupedByMonth() {
-    const grouped = this.groupBy(
-      this.upcoming,
-      sfs =>
-        `${sfs.DeliveryDate?.toLocaleString("default", {
-          month: "long",
-        })}, ${sfs.DeliveryDate?.getFullYear()}`,
-      "No Date"
-    );
-    return grouped;
-  }
-
-  /**
-   * @description gets the SFS that dont have an esd
-   * @returns MachineSetupForm[]
-   */
-  get noEsd() {
-    return this.Records.filter(sfs => !sfs.DeliveryDate);
-  }
-
   public formatViewRecords(records: {
     [id: string]: ComponentFramework.PropertyHelper.DataSetApi.EntityRecord;
-  }): MachineSetupForm[] {
+  }): void {
     const formattedRecords: MachineSetupForm[] = [];
     for (const recordId in records) {
       const record = records[recordId];
       const formattedRecord = this.formatViewRecord(record, recordId);
       formattedRecords.push(formattedRecord);
     }
-    this.ViewRecords = formattedRecords;
-    if (!this.isControlLoading) this.mergeSFS();
-    return formattedRecords;
+    this.Records = formattedRecords.sort((a, b) => {
+      // sort by date
+      if (a.estimatedDelivery && b.estimatedDelivery) {
+        return a.estimatedDelivery.getTime() - b.estimatedDelivery.getTime();
+      }
+      return 0;
+    });
   }
 
   private formatViewRecord(
     record: ComponentFramework.PropertyHelper.DataSetApi.EntityRecord,
     recordId: string
   ): MachineSetupForm {
-    const id = recordId;
-    const phase = record.getFormattedValue(
-      axa_MachineSetupFormAttributes.axa_CurrentPhase
-    );
-    const typeOfSale = record.getFormattedValue(
-      axa_MachineSetupFormAttributes.axa_TypeofSale
-    );
-    const warehouse = record.getFormattedValue(
-      axa_MachineSetupFormAttributes.axa_Warehouse
-    );
-    const model = record.getFormattedValue(
-      axa_MachineSetupFormAttributes.axa_Mocel
-    );
-    let estimatedDate = record.getFormattedValue(
-      axa_MachineSetupFormAttributes.axa_ESD
-    )
-      ? new Date(
-        record.getFormattedValue(axa_MachineSetupFormAttributes.axa_ESD)
-      )
-      : undefined;
-    let confirmedDate = record.getFormattedValue(
-      axa_MachineSetupFormAttributes.axa_ConfirmedDeliveryDate
-    )
-      ? new Date(
-        record.getFormattedValue(
-          axa_MachineSetupFormAttributes.axa_ConfirmedDeliveryDate
-        )
-      )
-      : undefined;
+    const guid = recordId;
+    const id = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DealID);
+    const inStock = record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock) === "Yes" ? true : false;
+    const serialNumber = record.getFormattedValue(axa_DealSetupFormAttributes.axa_SerialNumber);
+    const typeOfSale = record.getFormattedValue(axa_DealSetupFormAttributes.axa_TypeofSale);
+    const completedDate = record.getFormattedValue(axa_DealSetupFormAttributes.axa_CompletedDate);
+    const MsfStatus = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DSFstatus);
+    const model = record.getFormattedValue(axa_DealSetupFormAttributes.axa_Model);
+    let estimatedDelivery = record.getFormattedValue(axa_DealSetupFormAttributes.axa_EstimatedMachineArrival)
+      ? new Date(record.getFormattedValue(axa_DealSetupFormAttributes.axa_EstimatedMachineArrival)) : undefined;
     // @ts-ignore
-    const fullnameAttr = Object.keys(record._record.fields).find(key =>
-      key.endsWith("fullname")
-    );
+    const warehouseAttr = Object.keys(record._record.fields).find(key => key.endsWith("warehouse"));
     // @ts-ignore
-    const customerNameAttr = Object.keys(record._record.fields).find(key =>
-      key.endsWith(".name")
-    );
+    const warehouse = record._record.fields[warehouseAttr]?.innerValue?.value;
     // @ts-ignore
-    const title = record._record.fields[customerNameAttr]?.innerValue?.value;
+    const salesRepFullnameAttr = Object.keys(record._record.fields).find(key => key.endsWith("fullname"));
     // @ts-ignore
-    const salesResponsible =
-      record._record.fields[fullnameAttr]?.innerValue?.value;
-    return {
-      id,
-      title,
-      phase,
-      typeOfSale,
-      OpType: z2t_type.Sales,
-      DeliveryDate: confirmedDate ?? estimatedDate,
-      isDateConfirmed: !!confirmedDate,
-      salesResponsible: salesResponsible,
-      model,
-      warehouse,
-      requirements: {
-        MDC: false,
-        SA: false,
-        DA: axa_salesfulfillmentstatus_axa_salesfulfillmentstatus_axa_doescustomerhavedatagovernanceform.No,
-        DSR: false,
-        CWS: axa_cwsstatus.No,
-      },
-      department: {},
-    };
+    const salesResponsible = record._record.fields[salesRepFullnameAttr]?.innerValue?.value;
+    // @ts-ignore
+    const customerNameAttr = Object.keys(record._record.fields).find((key) => key.endsWith('.name'));
+    // @ts-ignore
+    const customerName = record._record.fields[customerNameAttr]?.innerValue?.value;
+
+    return { id, guid, customerName, warehouse, typeOfSale, inStock, serialNumber, completedDate, estimatedDelivery, salesResponsible, MsfStatus, model };
   }
 
-  /**
-   * This function merges the control SFS with the view SFS
-   * because the View SFS doesn't have departments, i need to get the departments myself as well as the OpType
-   * so i do that and then merge them
-   */
-  private mergeSFS() {
-    this.Records = this.ViewRecords.map(viewSFS => {
-      const controlSFS = this.ControlRecords[viewSFS.id];
-      if (!controlSFS) return viewSFS;
-      return {
-        ...viewSFS,
-        department: controlSFS.department,
-        OpType: controlSFS.OpType,
-        requirements: controlSFS.requirements,
-      };
-    }).sort((a, b) => {
-      // sort by date
-      if (a.DeliveryDate && b.DeliveryDate) {
-        return a.DeliveryDate.getTime() - b.DeliveryDate.getTime();
-      }
-      return 0;
-    });
+  public async completeMsf(guid: string, completedDate: Date): Promise<void> {
+    await this.context.webAPI.updateRecord(axa_dealsetupformMetadata.logicalName, guid, { [axa_DealSetupFormAttributes.axa_CompletedDate]: completedDate });
+    //refresh the view
+    this.context.parameters.MachineSetupForm.refresh();
   }
 }

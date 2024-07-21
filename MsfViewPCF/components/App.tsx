@@ -14,12 +14,7 @@ export interface props {
 const App = ({ serviceProvider }: props) => {
   const vm = serviceProvider.get<MsfViewVM>(MsfViewVM.serviceName);
   const forceUpdate = React.useReducer(() => ({}), {})[1] as () => void;
-
-  // this calls the init function again if the entityId changes, which eliminates the need for a refresh
-  useEffect(() => {
-    if (!vm.forceUpdate) vm.forceUpdate = forceUpdate;
-    vm.init();
-  }, []);
+  useEffect(() => { if (!vm.forceUpdate) vm.forceUpdate = forceUpdate; }, []);
 
   return (
     <>

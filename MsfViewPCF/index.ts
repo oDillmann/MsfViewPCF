@@ -32,23 +32,14 @@ export class MsfViewPCF
     _state: ComponentFramework.Dictionary,
     container: HTMLDivElement
   ): void {
-    console.info("Version 0.0.28");
+    console.info("Version 0.0.5");
     this.context = context;
     this.container = container;
     this.serviceProvider = new ServiceProvider();
-    this.serviceProvider.register<CdsService>(
-      CdsService.serviceName,
-      new CdsService(context)
-    );
-    this.serviceProvider.register<ComponentFramework.Context<IInputs>>(
-      "context",
-      context
-    );
-    this.serviceProvider.register<() => void>(
-      "notifyOutputChanged",
-      notifyOutputChanged
-    );
-    this.context.parameters.sampleDataSet.paging.setPageSize(1000);
+    this.serviceProvider.register<CdsService>(CdsService.serviceName, new CdsService(context));
+    this.serviceProvider.register<ComponentFramework.Context<IInputs>>("context", context);
+    this.serviceProvider.register<() => void>("notifyOutputChanged", notifyOutputChanged);
+    this.context.parameters.MachineSetupForm.paging.setPageSize(5000);
     this.vm = new MsfViewVM(this.serviceProvider);
     this.serviceProvider.register<MsfViewVM>(MsfViewVM.serviceName, this.vm);
   }
@@ -62,13 +53,10 @@ export class MsfViewPCF
     _context: ComponentFramework.Context<IInputs>
   ): React.ReactElement {
     const vm = this.serviceProvider.get<MsfViewVM>(MsfViewVM.serviceName);
-    if (_context.parameters.sampleDataSet.loading) {
-      vm.isViewLoading = true;
-      vm.init();
-    } else {
-      vm.isViewLoading = false;
-      vm.formatViewRecords(_context.parameters.sampleDataSet.records);
+    if (!_context.parameters.MachineSetupForm.loading) {
+      vm.formatViewRecords(_context.parameters.MachineSetupForm.records);
     }
+    vm.isViewLoading = _context.parameters.MachineSetupForm.loading
     //because updateView is called twice everytime the form is loaded, we need to make sure we only execute the init method once
     ReactDOM.render(
       createElement(App, {

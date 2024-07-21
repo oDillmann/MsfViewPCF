@@ -11,20 +11,10 @@ export const enum opportunity_opportunity_statuscode {
   SelfPerform = 594100071,
   SoldMachine = 594100069,
   Timing = 594100073,
-  Postponed = 594100066,
-  DealerPreference = 594100045,
   InProgress = 1,
   OnHold = 2,
-  Financing = 594100053,
   InventoryAvailable = 3,
   DealerPreference = 594100054,
-  BrandPreference = 594100055,
-  QualityReliability = 594100056,
-  Credit = 594100057,
-  ProductPerformance = 594100058,
-  Relationship = 594100059,
-  Configuration = 594100060,
-  ValueAddOptions = 594100061,
   NoDeal = 594100067,
   ColumnFodder = 594100044,
   Credit = 594100047,
@@ -41,4 +31,4 @@ export const enum opportunity_opportunity_statuscode {
   Configuration = 594100063,
   ValueAddOptions = 594100064,
 }
-  
+
