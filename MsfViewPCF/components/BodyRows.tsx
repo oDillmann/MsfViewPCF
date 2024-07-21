@@ -55,7 +55,7 @@ const BodyRows = ({ msf }: props) => {
                       <Icon iconName="Accept" styles={{ root: { height: "1rem", aspectRatio: "1", fontWeight: "900" } }} />
                     </button>
                   </Stack.Item>
-                  <TextField type="date" styles={{ fieldGroup: { border: "1px solid #ddd" } }} onChange={(_e, value) => { value && setCompletedDate(new Date(value)) }} />
+                  <TextField type="date" styles={{ fieldGroup: { border: "1px solid #ddd" } }} onChange={(_e, value) => { console.log("changed", value); setCompletedDate(value ? new Date(value) : null) }} />
                 </Stack>
               ) : (
                 <Text variant="mediumPlus" nowrap block styles={{ root: { ...(i === 8 ? { fontWeight: '600', ...(msf.MsfStatus === "Approved" ? { color: "#2c2" } : msf.MsfStatus === "Submitted" ? { color: "red" } : {}) } : {}) } }}>
