@@ -7,10 +7,11 @@ export type MachineSetupForm = {
   typeOfSale?: string
   estimatedDelivery?: Date,
   completedDate?: string,
+  pickupDelivery?: string,
   model?: string,
   serialNumber?: string,
   warehouse?: string,
   MsfStatus?: string,
-  inStock?: boolean,
+  inStock?: string,
   salesResponsible?: string,
 }

@@ -4,16 +4,13 @@ import React from "react";
 import { useVM } from "../viewModel/context";
 import { ViewType } from "../viewModel/MsfViewVM";
 
-const tableHeaderNames: Record<number, string> = { 0: "Customer Name", 1: "Estimated Delivery", 2: "Model", 3: "Type", 4: "Sales Responsible", 5: "Serial Number", 6: "Machine Setup", 7: "In Stock", 8: "Status", 9: "Completed Date" }
-const headersCount = Object.keys(tableHeaderNames).length;
-
 const TableHeaders = () => {
   const vm = useVM();
 
   return (
     <>
       <colgroup>
-        {Array.from({ length: headersCount }).map((_, index) => (<col key={index} style={{ width: "auto" }} />))}
+        {Array.from({ length: vm.HeadersCount }).map((_, index) => (<col key={index} style={{ width: "auto" }} />))}
       </colgroup>
       <thead style={{ position: "sticky", top: 0, backgroundColor: "#fff" }}>
         <tr className='tableHeader' style={{ display: "table-row" }}>
@@ -28,11 +25,11 @@ const TableHeaders = () => {
               />
             </Stack>
           </th>
-          {Array.from({ length: headersCount }).map((_, i) => (
+          {Array.from({ length: vm.HeadersCount }).map((_, i) => (
             <th key={i} style={{ height: 0, whiteSpace: "nowrap" }} >
               <Stack verticalAlign='center' styles={{ root: { padding: "0.3rem 1rem", border: "2px solid #fff", height: "100%", backgroundColor: "#eee", }, }} >
                 <Text styles={{ root: { fontWeight: "600" } }}>
-                  {tableHeaderNames[i]}
+                  {vm.TableHeaderNames[i]}
                 </Text>
               </Stack>
             </th>

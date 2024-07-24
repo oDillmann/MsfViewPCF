@@ -50,7 +50,7 @@ const TableView = () => {
           <tbody>
             <tr>
               <td colSpan={1}></td>
-              <td colSpan={10} style={{ padding: "5rem", textAlign: "center", fontWeight: "900", fontSize: "1.4rem", color: "#888" }}>
+              <td colSpan={11} style={{ padding: "5rem", textAlign: "center", fontWeight: "900", fontSize: "1.4rem", color: "#888" }}>
                 No records found
               </td>
             </tr>

@@ -40,12 +40,12 @@ const BodyRows = ({ msf }: props) => {
 
   return (
     <>
-      {Array.from({ length: 10 }).map((_, i) => (
-        <td style={{ height: 0, whiteSpace: 'nowrap' }} key={i}>
+      {Object.entries(vm.TableHeaderNames).map(([key]) => (
+        <td style={{ height: 0, whiteSpace: 'nowrap' }} key={key}>
           <Stack verticalAlign="center" horizontalAlign="start" styles={{ root: { padding: '0.6rem 1rem', border: '2px solid #eee', height: '100%' } }} >
-            {i === 6 ?
+            {key === "6" ?
               <Link variant="mediumPlus" styles={{ root: { fontWeight: "600" } }} onClick={() => { vm.context.navigation.openForm({ entityName: axa_dealsetupformMetadata.logicalName, entityId: msf.guid, openInNewWindow: true }) }}>{msf.id}</Link>
-              : (i === 9 && !vm.isReadOnly) ? (
+              : (key === "10" && !vm.isReadOnly) ? (
                 <Stack horizontal >
                   <Stack.Item styles={{ root: { width: "32px", height: "32px" } }}>
                     <button
@@ -58,16 +58,17 @@ const BodyRows = ({ msf }: props) => {
                   <TextField type="date" styles={{ fieldGroup: { border: "1px solid #ddd" } }} onChange={(_e, value) => { console.log("changed", value); setCompletedDate(value ? new Date(value) : null) }} />
                 </Stack>
               ) : (
-                <Text variant="mediumPlus" nowrap block styles={{ root: { ...(i === 8 ? { fontWeight: '600', ...(msf.MsfStatus === "Approved" ? { color: "#2c2" } : msf.MsfStatus === "Submitted" ? { color: "red" } : {}) } : {}) } }}>
-                  {i === 0 ? msf.customerName :
-                    i === 1 ? msf.estimatedDelivery?.toDateString() :
-                      i === 2 ? msf?.model :
-                        i === 3 ? msf?.typeOfSale :
-                          i === 4 ? msf?.salesResponsible :
-                            i === 5 ? msf?.serialNumber :
-                              i === 7 ? msf?.inStock :
-                                i === 8 ? msf?.MsfStatus :
-                                  i === 9 && vm.isReadOnly ? msf?.completedDate : ""
+                <Text variant="mediumPlus" nowrap block styles={{ root: { ...(key === "9" ? { fontWeight: '600', ...(msf.MsfStatus === "Approved" ? { color: "#2c2" } : msf.MsfStatus === "Submitted" ? { color: "red" } : {}) } : {}) } }}>
+                  {key === "0" ? msf.customerName :
+                    key === "1" ? msf.estimatedDelivery?.toDateString() :
+                      key === "2" ? msf?.model :
+                        key === "3" ? msf?.typeOfSale :
+                          key === "4" ? msf?.salesResponsible :
+                            key === "5" ? msf?.serialNumber :
+                              key === "7" ? msf?.pickupDelivery :
+                                key === "8" ? msf?.inStock :
+                                  key === "9" ? msf?.MsfStatus :
+                                    key === "10" && vm.isReadOnly ? msf?.completedDate : ""
                   }
                 </Text>
               )}

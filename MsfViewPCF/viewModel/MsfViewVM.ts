@@ -9,6 +9,10 @@ export enum ViewType { "Sales Responsible", "Warehouse", }
 
 export default class MsfViewVM {
   public static readonly serviceName = "MsfViewVM";
+  public TableHeaderNames: Record<number, string> = { 0: "Customer Name", 1: "Estimated Delivery", 2: "Model", 3: "Type", 4: "Sales Responsible", 5: "Serial Number", 6: "Machine Setup", 7: "Pickup/Delivery", 8: "In Stock", 9: "Status", 10: "Completed Date" }
+  get HeadersCount() {
+    return Object.keys(this.TableHeaderNames).length;
+  }
   public serviceProvider: ServiceProvider;
   public context: ComponentFramework.Context<IInputs>;
   public notifyOutputChanged: () => void;
@@ -128,9 +132,12 @@ export default class MsfViewVM {
   ): MachineSetupForm {
     const guid = recordId;
     const id = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DealID);
-    const inStock = record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock) === "Yes" ? true : false;
+    const inStock = record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock);
+    console.log(record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock))
     const serialNumber = record.getFormattedValue(axa_DealSetupFormAttributes.axa_SerialNumber);
     const typeOfSale = record.getFormattedValue(axa_DealSetupFormAttributes.axa_TypeofSale);
+    const pickupDelivery = record.getFormattedValue(axa_DealSetupFormAttributes.axa_PickupDelivery);
+    console.log(pickupDelivery)
     const completedDate = record.getFormattedValue(axa_DealSetupFormAttributes.axa_CompletedDate);
     const MsfStatus = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DSFstatus);
     const model = record.getFormattedValue(axa_DealSetupFormAttributes.axa_Model);
@@ -149,7 +156,7 @@ export default class MsfViewVM {
     // @ts-ignore
     const customerName = record._record.fields[customerNameAttr]?.innerValue?.value;
 
-    return { id, guid, customerName, warehouse, typeOfSale, inStock, serialNumber, completedDate, estimatedDelivery, salesResponsible, MsfStatus, model };
+    return { id, guid, customerName, warehouse, typeOfSale, inStock, serialNumber, completedDate, estimatedDelivery, salesResponsible, MsfStatus, model, pickupDelivery };
   }
 
   public async completeMsf(guid: string, completedDate: Date): Promise<void> {
