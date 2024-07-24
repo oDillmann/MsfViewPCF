@@ -133,11 +133,9 @@ export default class MsfViewVM {
     const guid = recordId;
     const id = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DealID);
     const inStock = record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock);
-    console.log(record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock))
     const serialNumber = record.getFormattedValue(axa_DealSetupFormAttributes.axa_SerialNumber);
     const typeOfSale = record.getFormattedValue(axa_DealSetupFormAttributes.axa_TypeofSale);
     const pickupDelivery = record.getFormattedValue(axa_DealSetupFormAttributes.axa_PickupDelivery);
-    console.log(pickupDelivery)
     const completedDate = record.getFormattedValue(axa_DealSetupFormAttributes.axa_CompletedDate);
     const MsfStatus = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DSFstatus);
     const model = record.getFormattedValue(axa_DealSetupFormAttributes.axa_Model);
