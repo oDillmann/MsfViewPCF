@@ -10,9 +10,7 @@ export enum ViewType { "Sales Responsible", "Warehouse", }
 export default class MsfViewVM {
   public static readonly serviceName = "MsfViewVM";
   public TableHeaderNames: Record<number, string> = { 0: "Customer Name", 1: "Estimated Delivery", 2: "Model", 3: "Type", 4: "Sales Responsible", 5: "Serial Number", 6: "Machine Setup", 7: "Pickup/Delivery", 8: "In Stock", 9: "Status", 10: "Completed Date" }
-  get HeadersCount() {
-    return Object.keys(this.TableHeaderNames).length;
-  }
+  get HeadersCount() { return Object.keys(this.TableHeaderNames).length; }
   public serviceProvider: ServiceProvider;
   public context: ComponentFramework.Context<IInputs>;
   public notifyOutputChanged: () => void;
@@ -22,17 +20,11 @@ export default class MsfViewVM {
   public PCFerror?: string = undefined;
   public isReadOnly?: boolean = false;
   public isViewLoading: boolean = true;
-  get isLoading() {
-    return this.isViewLoading;
-  }
+  get isLoading() { return this.isViewLoading; }
   public forceUpdate: () => void;
   private viewType: ViewType = ViewType.Warehouse;
-  get ViewType() {
-    return this.viewType;
-  }
-  set ViewType(value) {
-    this.viewType = value;
-  }
+  get ViewType() { return this.viewType; }
+  set ViewType(value) { this.viewType = value; }
   saveHandlerAdded: any;
 
   constructor(serviceProvider: ServiceProvider) {
@@ -108,22 +100,32 @@ export default class MsfViewVM {
     );
   }
 
-  public formatViewRecords(records: {
+  public async formatViewRecords(records: {
     [id: string]: ComponentFramework.PropertyHelper.DataSetApi.EntityRecord;
-  }): void {
+  }): Promise<void> {
     const formattedRecords: MachineSetupForm[] = [];
-    for (const recordId in records) {
-      const record = records[recordId];
-      const formattedRecord = this.formatViewRecord(record, recordId);
-      formattedRecords.push(formattedRecord);
-    }
-    this.Records = formattedRecords.sort((a, b) => {
-      // sort by date
-      if (a.estimatedDelivery && b.estimatedDelivery) {
-        return a.estimatedDelivery.getTime() - b.estimatedDelivery.getTime();
+    const ids = Object.keys(records);
+    try {
+      let result;
+      if (ids.length)
+        result = await this.cdsService.fetchData(ids);
+      for (const recordId in records) {
+        const record = records[recordId];
+        const formattedRecord = this.formatViewRecord(record, recordId);
+        formattedRecord.warehouse = result && result[recordId] ? result[recordId] : formattedRecord.warehouse;
+        formattedRecords.push(formattedRecord);
       }
-      return 0;
-    });
+      this.Records = formattedRecords.sort((a, b) => {
+        // sort by date
+        if (a.estimatedDelivery && b.estimatedDelivery) {
+          return a.estimatedDelivery.getTime() - b.estimatedDelivery.getTime();
+        }
+        return 0;
+      });
+    } catch (error: any) {
+      this.setError(error.message);
+    }
+    this.isViewLoading = false;
   }
 
   private formatViewRecord(
@@ -133,11 +135,9 @@ export default class MsfViewVM {
     const guid = recordId;
     const id = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DealID);
     const inStock = record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock);
-    console.log(record.getFormattedValue(axa_DealSetupFormAttributes.axa_InStock))
     const serialNumber = record.getFormattedValue(axa_DealSetupFormAttributes.axa_SerialNumber);
     const typeOfSale = record.getFormattedValue(axa_DealSetupFormAttributes.axa_TypeofSale);
     const pickupDelivery = record.getFormattedValue(axa_DealSetupFormAttributes.axa_PickupDelivery);
-    console.log(pickupDelivery)
     const completedDate = record.getFormattedValue(axa_DealSetupFormAttributes.axa_CompletedDate);
     const MsfStatus = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DSFstatus);
     const model = record.getFormattedValue(axa_DealSetupFormAttributes.axa_Model);
@@ -155,7 +155,6 @@ export default class MsfViewVM {
     const customerNameAttr = Object.keys(record._record.fields).find((key) => key.endsWith('.name'));
     // @ts-ignore
     const customerName = record._record.fields[customerNameAttr]?.innerValue?.value;
-
     return { id, guid, customerName, warehouse, typeOfSale, inStock, serialNumber, completedDate, estimatedDelivery, salesResponsible, MsfStatus, model, pickupDelivery };
   }
 

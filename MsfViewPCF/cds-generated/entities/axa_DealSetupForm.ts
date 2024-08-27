@@ -18,6 +18,7 @@ export const axa_dealsetupformMetadata = {
     axa_dsfstatus: "Optionset",
     axa_paymentmethod: "Optionset",
     axa_pickupdelivery: "Optionset",
+    axa_shouldservicereceiveamachinesetupform: "Optionset",
     axa_typeofsales1: "Optionset",
     statecode: "Optionset",
     statuscode: "Optionset",
@@ -49,6 +50,7 @@ export const axa_dealsetupformMetadata = {
     axa_Opportunity: ["mscrm.opportunity"],
     axa_Model: ["mscrm.z2t_model"],
     axa_Make: ["mscrm.z2t_make"],
+    axa_EquipmentNumberEQN: ["mscrm.z2t_equipment"],
     axa_EquipmentID: ["mscrm.z2t_equipment"],
     axa_CustomerProspect_contact: ["mscrm.contact"],
     axa_CustomerProspect_account: ["mscrm.account"],
@@ -110,6 +112,8 @@ export enum axa_DealSetupFormAttributes {
   axa_DSFstatus = "axa_dsfstatus",
   axa_EquipmentID = "axa_equipmentid",
   axa_EquipmentIDName = "axa_equipmentidname",
+  axa_EquipmentNumberEQN = "axa_equipmentnumbereqn",
+  axa_EquipmentNumberEQNName = "axa_equipmentnumbereqnname",
   axa_EstimatedDeliveryDatetoCustomer = "axa_estimateddeliverydatetocustomer",
   axa_EstimatedMachineArrival = "axa_estimatedmachinearrival",
   axa_ExtendedWarrantyIncludedfreetext = "axa_extendedwarrantyincludedfreetext",
@@ -176,6 +180,7 @@ export enum axa_DealSetupFormAttributes {
   axa_ServiceCallName = "axa_servicecallname",
   axa_ServiceManual = "axa_servicemanual",
   axa_ShiptoAddress = "axa_shiptoaddress",
+  axa_ShouldServiceReceiveaMachineSetupForm = "axa_shouldservicereceiveamachinesetupform",
   axa_SignedAgreementatDelivery = "axa_signedagreementatdelivery",
   axa_SN = "axa_sn",
   axa_SoldToCustomerName = "axa_soldtocustomername",
@@ -327,6 +332,10 @@ export interface axa_DealSetupForm extends IEntity {
   axa_equipmentid?: import("cdsify").EntityReference | null;
   //  StringType
   axa_equipmentidname?: string | null;
+  // Equipment Number (EQN#) LookupType
+  axa_equipmentnumbereqn?: import("cdsify").EntityReference | null;
+  //  StringType
+  axa_equipmentnumbereqnname?: string | null;
   // Estimated Arrival Date [Required] DateTimeType DateOnly:UserLocal
   axa_estimateddeliverydatetocustomer?: Date;
   // Estimated Delivery to Customer [Required] DateTimeType DateOnly:UserLocal
@@ -459,6 +468,8 @@ export interface axa_DealSetupForm extends IEntity {
   axa_servicemanual?: boolean | null;
   // Ship to Address StringType
   axa_shiptoaddress?: string | null;
+  // Should Service Receive a Machine Setup Form [Required] axa_shouldservicereceiveamachinesetupfo
+  axa_shouldservicereceiveamachinesetupform?: import("../enums/axa_shouldservicereceiveamachinesetupfo").axa_shouldservicereceiveamachinesetupfo;
   // Signed Agreement at Delivery BooleanType
   axa_signedagreementatdelivery?: boolean | null;
   // S/N StringType

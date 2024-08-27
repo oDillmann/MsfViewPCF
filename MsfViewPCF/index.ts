@@ -32,7 +32,7 @@ export class MsfViewPCF
     _state: ComponentFramework.Dictionary,
     container: HTMLDivElement
   ): void {
-    console.info("Version 0.0.6");
+    console.info("Version 0.0.7");
     this.context = context;
     this.container = container;
     this.serviceProvider = new ServiceProvider();
@@ -53,10 +53,11 @@ export class MsfViewPCF
     _context: ComponentFramework.Context<IInputs>
   ): React.ReactElement {
     const vm = this.serviceProvider.get<MsfViewVM>(MsfViewVM.serviceName);
-    if (!_context.parameters.MachineSetupForm.loading) {
+    if (_context.parameters.MachineSetupForm.loading) {
+      vm.isViewLoading = _context.parameters.MachineSetupForm.loading
+    } else {
       vm.formatViewRecords(_context.parameters.MachineSetupForm.records);
     }
-    vm.isViewLoading = _context.parameters.MachineSetupForm.loading
     //because updateView is called twice everytime the form is loaded, we need to make sure we only execute the init method once
     ReactDOM.render(
       createElement(App, {
