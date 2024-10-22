@@ -9,7 +9,7 @@ export enum ViewType { "Sales Responsible", "Warehouse", }
 
 export default class MsfViewVM {
   public static readonly serviceName = "MsfViewVM";
-  public TableHeaderNames: Record<number, string> = { 0: "Customer Name", 1: "Estimated Delivery", 2: "Model", 3: "Type", 4: "Sales Responsible", 5: "Serial Number", 6: "Machine Setup", 7: "Pickup/Delivery", 8: "In Stock", 9: "Status", 10: "Completed Date" }
+  public TableHeaderNames: Record<number, string> = { 0: "Customer Name", 1: "Estimated Delivery", 2: "Model", 3: "Type", 4: "Sales Responsible", 5: "Serial Number", 6: "Machine Setup", 7: "SFS Quantity", 8: "Pickup/Delivery", 9: "In Stock", 10: "Status", 11: "Completed Date" }
   get HeadersCount() { return Object.keys(this.TableHeaderNames).length; }
   public serviceProvider: ServiceProvider;
   public context: ComponentFramework.Context<IInputs>;
