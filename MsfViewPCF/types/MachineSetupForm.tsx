@@ -11,6 +11,7 @@ export type MachineSetupForm = {
   model?: string,
   serialNumber?: string,
   warehouse?: string,
+  numOfSfs?: number,
   MsfStatus?: string,
   inStock?: string,
   salesResponsible?: string,

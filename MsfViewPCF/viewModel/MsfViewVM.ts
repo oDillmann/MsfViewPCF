@@ -112,11 +112,11 @@ export default class MsfViewVM {
       for (const recordId in records) {
         const record = records[recordId];
         const formattedRecord = this.formatViewRecord(record, recordId);
-        formattedRecord.warehouse = result && result[recordId] ? result[recordId] : formattedRecord.warehouse;
+        formattedRecord.warehouse = result && result[recordId] ? result[recordId].warehouse : formattedRecord.warehouse;
+        formattedRecord.numOfSfs = result && result[recordId] ? result[recordId].numOfSfs : 0;
         formattedRecords.push(formattedRecord);
       }
-      this.Records = formattedRecords.sort((a, b) => {
-        // sort by date
+      this.Records = formattedRecords.sort((a, b) => { // sort by date
         if (a.estimatedDelivery && b.estimatedDelivery) {
           return a.estimatedDelivery.getTime() - b.estimatedDelivery.getTime();
         }

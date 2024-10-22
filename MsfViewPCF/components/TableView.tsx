@@ -36,11 +36,7 @@ const TableView = () => {
 
   const groupByComponent = React.useMemo(() => {
     return groupByHandlers[vm.ViewType](vm);
-  }, [
-    vm.ViewType,
-    vm.groupBySalesResponsible,
-    vm.groupedByWarehouse,
-  ]);
+  }, [vm.ViewType, vm.groupBySalesResponsible, vm.groupedByWarehouse,]);
 
   return (
     <Stack horizontal styles={{ root: { padding: "0 0 0 1rem", height: "100%", width: "100%", overflowY: "scroll" } }}>

@@ -67,8 +67,8 @@ const CollapsibleRows = ({ MSF, periodTitle, pastDue }: props) => {
         </td>
       </tr>
       {MSF.map((msf) => (
-        <tr className="tableRow" key={msf.guid} style={{ display: expanded ? 'table-row' : 'none' }}>
-          <td style={{ backgroundColor: '#fff' }}>
+        <tr className="tableRow" key={msf.guid} style={expanded ? { display: "table-row", backgroundColor: "#ffc" } : { display: "none" }}>
+          <td style={{ backgroundColor: "#fff" }}>
           </td>
           <BodyRows msf={msf} />
         </tr>
