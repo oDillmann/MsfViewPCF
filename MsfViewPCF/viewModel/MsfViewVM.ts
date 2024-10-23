@@ -112,8 +112,7 @@ export default class MsfViewVM {
       for (const recordId in records) {
         const record = records[recordId];
         const formattedRecord = this.formatViewRecord(record, recordId);
-        formattedRecord.warehouse = result && result[recordId] ? result[recordId].warehouse : formattedRecord.warehouse;
-        formattedRecord.numOfSfs = result && result[recordId] ? result[recordId].numOfSfs : 0;
+        formattedRecord.warehouse = result && result[recordId] ? result[recordId] : formattedRecord.warehouse;
         formattedRecords.push(formattedRecord);
       }
       this.Records = formattedRecords.sort((a, b) => { // sort by date
@@ -140,6 +139,7 @@ export default class MsfViewVM {
     const pickupDelivery = record.getFormattedValue(axa_DealSetupFormAttributes.axa_PickupDelivery);
     const completedDate = record.getFormattedValue(axa_DealSetupFormAttributes.axa_CompletedDate);
     const MsfStatus = record.getFormattedValue(axa_DealSetupFormAttributes.axa_DSFstatus);
+    const quantity = parseInt(record.getFormattedValue(axa_DealSetupFormAttributes.axa_Quantity));
     const model = record.getFormattedValue(axa_DealSetupFormAttributes.axa_Model);
     let estimatedDelivery = record.getFormattedValue(axa_DealSetupFormAttributes.axa_EstimatedMachineArrival)
       ? new Date(record.getFormattedValue(axa_DealSetupFormAttributes.axa_EstimatedMachineArrival)) : undefined;
@@ -155,7 +155,7 @@ export default class MsfViewVM {
     const customerNameAttr = Object.keys(record._record.fields).find((key) => key.endsWith('.name'));
     // @ts-ignore
     const customerName = record._record.fields[customerNameAttr]?.innerValue?.value;
-    return { id, guid, customerName, warehouse, typeOfSale, inStock, serialNumber, completedDate, estimatedDelivery, salesResponsible, MsfStatus, model, pickupDelivery };
+    return { id, guid, customerName, warehouse, typeOfSale, inStock, serialNumber, completedDate, estimatedDelivery, salesResponsible, MsfStatus, model, pickupDelivery, quantity };
   }
 
   public async completeMsf(guid: string, completedDate: Date): Promise<void> {

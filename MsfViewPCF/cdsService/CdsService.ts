@@ -10,7 +10,7 @@ export default class CdsService {
     this.Context = context;
   }
 
-  public async fetchData(ids: string[]): Promise<Record<string, { warehouse: string, numOfSfs: number }>> {
+  public async fetchData(ids: string[]): Promise<Record<string, string>> {
     // fetch some data
     const DFSFetchXml = [
       "?fetchXml=",
@@ -35,13 +35,14 @@ export default class CdsService {
     return formattedDFS;
   }
 
-  public formatRecords(data: ComponentFramework.WebApi.Entity[]): Record<string, { warehouse: string, numOfSfs: number }> {
-    const MSF: Record<string, { warehouse: string, numOfSfs: number }> = {};
+  public formatRecords(
+    data: ComponentFramework.WebApi.Entity[]
+  ): Record<string, string> {
+    const MSF: Record<string, string> = {};
     data.forEach(SFS => {
       const id = SFS[`_${axa_SalesFulfillmentStatusAttributes.axa_DSF}_value`];
       const warehouse = SFS[axa_SalesFulfillmentStatusAttributes.axa_Warehouse];
-      if (MSF[id]) { MSF[id].numOfSfs++; }
-      else MSF[id] = { warehouse, numOfSfs: 1 }
+      MSF[id] = warehouse
     });
     return MSF;
   }
