@@ -65,7 +65,7 @@ const BodyRows = ({ msf }: props) => {
                         key === "3" ? msf?.typeOfSale :
                           key === "4" ? msf?.salesResponsible :
                             key === "5" ? msf?.serialNumber :
-                              key === "7" ? msf?.numOfSfs :
+                              key === "7" ? msf?.quantity :
                                 key === "8" ? msf?.pickupDelivery :
                                   key === "9" ? msf?.inStock :
                                     key === "10" ? msf?.MsfStatus :
